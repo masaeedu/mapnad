@@ -3,7 +3,6 @@ module Main where
 
 import Data.Map.Strict
 import Data.Monoid
-import Data.Functor
 
 import Control.Monad
 
@@ -15,13 +14,19 @@ import Hedgehog.Classes
 newtype Mapnad k v = Mapnad { runMapnad :: Map k v }
   deriving newtype (Show, Eq, Functor)
 
+fromList' :: Ord k => [(k, v)] -> Mapnad k v
+fromList' = Mapnad . fromList
+
+toList' :: Mapnad k v -> [(k,  v)]
+toList' = toList . runMapnad
+
 instance (Ord k, Monoid k) => Applicative (Mapnad k)
   where
   pure = return
   (<*>) = ap
 
 joinMapnad :: (Ord k, Monoid k) => Mapnad k (Mapnad k v) -> Mapnad k v
-joinMapnad (Mapnad (fmap runMapnad -> mm)) = Mapnad $ fromList $ fmap (\(k1, (k2, v)) -> (k1 <> k2, v)) $ (>>= sequenceA) $ toList $ fmap toList $ mm
+joinMapnad = fromList' . fmap join . (>>= sequenceA) . toList' . fmap toList'
 
 instance (Ord k, Monoid k) => Monad (Mapnad k)
   where
@@ -37,11 +42,10 @@ genMap k g = Mapnad <$> G.map aGoodSize ((,) <$> k <*> g)
 sumgen :: Gen (Sum Int)
 sumgen = Sum <$> G.int (R.linear (-100) 100)
 
-mulgen :: Gen (Product Int)
-mulgen = Product <$> G.int aGoodSize
-
 strgen :: Gen String
 strgen = G.string aGoodSize G.alpha
 
-main :: IO ()
-main = void $ lawsCheck $ monadLaws $ genMap sumgen
+main :: IO Bool
+main = do
+  lawsCheck $ monadLaws $ genMap strgen
+  lawsCheck $ monadLaws $ genMap sumgen
