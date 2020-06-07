@@ -35,7 +35,7 @@ genMap :: (Ord k, Monoid k) => Gen k -> Gen a -> Gen (Mapnad k a)
 genMap k g = Mapnad <$> G.map aGoodSize ((,) <$> k <*> g)
 
 sumgen :: Gen (Sum Int)
-sumgen = Sum <$> G.int aGoodSize
+sumgen = Sum <$> G.int (R.linear (-100) 100)
 
 mulgen :: Gen (Product Int)
 mulgen = Product <$> G.int aGoodSize
@@ -44,4 +44,4 @@ strgen :: Gen String
 strgen = G.string aGoodSize G.alpha
 
 main :: IO ()
-main = void $ lawsCheck $ monadLaws $ genMap strgen
+main = void $ lawsCheck $ monadLaws $ genMap sumgen
