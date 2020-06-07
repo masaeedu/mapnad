@@ -10,8 +10,8 @@ source-dirs: src
 dependencies:
   - { name: "base", version: ">=4.12 && <4.13" }
   - containers
-  - QuickCheck
-  - quickcheck-classes
+  - hedgehog
+  - hedgehog-classes
 
 ghc-options: -Wall
 default-extensions:
