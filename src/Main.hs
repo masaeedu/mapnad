@@ -10,7 +10,7 @@ import Test.QuickCheck
 import Test.QuickCheck.Classes
 
 newtype Mapnad k v = Mapnad { runMapnad :: Map k v }
-  deriving (Show, Eq, Arbitrary, Functor)
+  deriving newtype (Show, Eq, Arbitrary, Functor)
 
 instance (Ord k, Monoid k) => Applicative (Mapnad k)
   where
